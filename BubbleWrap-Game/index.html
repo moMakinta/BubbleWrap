@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Wrap - Interactive Stress Relief</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        /* Theme styles */
+        .theme-rainbow {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        .theme-ocean {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .theme-sunset {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+        }
+
+        .theme-forest {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        .theme-space {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+
+        .theme-space::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+
+        .theme-candy {
+            background: linear-gradient(45deg, #ff6b9d, #c44569, #f8b500, #ff3838, #ff9ff3, #54a0ff);
+            background-size: 400% 400%;
+            animation: gradientShift 6s ease infinite;
+        }
+
+        .theme-neon {
+            background: linear-gradient(135deg, #0f0f23 0%, #2d1b69 50%, #11998e 100%);
+        }
+
+        .theme-autumn {
+            background: linear-gradient(135deg, #d63031 0%, #e17055 25%, #fdcb6e 50%, #6c5ce7 100%);
+        }
+
+        .theme-arctic {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #00cec9 100%);
+        }
+
+        .theme-volcano {
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 25%, #d63031 50%, #2d3436 100%);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 30px;
+            border-radius: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 90vw;
+        }
+
+        .title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-btn.paused {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+
+        .stat {
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .theme-btn {
+            width: 35px;
+            height: 35px;
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-btn.active {
+            transform: scale(1.2);
+            border-color: #333;
+        }
+
+        .theme-rainbow-btn { background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4); }
+        .theme-ocean-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .theme-sunset-btn { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        .theme-forest-btn { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .theme-space-btn { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); }
+        .theme-candy-btn { background: linear-gradient(45deg, #ff6b9d, #c44569, #f8b500); }
+        .theme-neon-btn { background: linear-gradient(135deg, #0f0f23 0%, #2d1b69 50%, #11998e 100%); }
+        .theme-autumn-btn { background: linear-gradient(135deg, #d63031 0%, #e17055 25%, #fdcb6e 50%); }
+        .theme-arctic-btn { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #00cec9 100%); }
+        .theme-volcano-btn { background: linear-gradient(135deg, #fd79a8 0%, #e84393 25%, #d63031 50%); }
+
+        .missions-panel {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            width: 280px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .missions-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .mission {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            border-left: 4px solid #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .mission.active {
+            border-left-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .mission.completed {
+            border-left-color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+            opacity: 0.8;
+        }
+
+        .mission-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .mission-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .mission-progress {
+            font-size: 0.8rem;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .mission.completed .progress-fill {
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+        }
+
+        .overall-progress {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .overall-progress-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .overall-progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .overall-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #feca57, #ff9ff3, #4ecdc4);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .mission-reward {
+            background: #feca57;
+            color: #333;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            animation: float 6s ease-in-out infinite;
+            box-shadow: 
+                inset -10px -10px 20px rgba(0, 0, 0, 0.1),
+                inset 10px 10px 20px rgba(255, 255, 255, 0.3),
+                0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 
+                inset -10px -10px 20px rgba(0, 0, 0, 0.15),
+                inset 10px 10px 20px rgba(255, 255, 255, 0.4),
+                0 12px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .bubble.golden {
+            border: 3px solid #ffd700;
+            box-shadow: 
+                inset -10px -10px 20px rgba(0, 0, 0, 0.1),
+                inset 10px 10px 20px rgba(255, 255, 255, 0.3),
+                0 8px 32px rgba(255, 215, 0, 0.4);
+        }
+
+        .bubble.giant {
+            border: 3px solid #ff6b6b;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(-10px) rotate(-5deg); }
+            75% { transform: translateY(-15px) rotate(3deg); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .popping {
+            animation: pop 0.3s ease-out forwards;
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(46, 204, 113, 0.95);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 1.5rem; }
+            .header { padding: 10px 20px; }
+            .theme-btn { width: 30px; height: 30px; }
+            .missions-panel { 
+                position: fixed;
+                right: 10px;
+                top: auto;
+                bottom: 100px;
+                transform: none;
+                width: calc(100vw - 20px);
+                max-width: 300px;
+                max-height: 200px;
+            }
+            .stats { gap: 10px; }
+            .stat { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body class="theme-rainbow">
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🫧 Bubble Wrap 🫧</h1>
+            <div class="controls">
+                <button class="control-btn" id="playPauseBtn" onclick="toggleGame()">⏸️ Pause</button>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div>Bubbles Popped</div>
+                    <div class="stat-value" id="scoreCount">0</div>
+                </div>
+                <div class="stat">
+                    <div>Streak</div>
+                    <div class="stat-value" id="streakCount">0</div>
+                </div>
+                <div class="stat">
+                    <div>Level</div>
+                    <div class="stat-value" id="levelCount">1</div>
+                </div>
+            </div>
+            <div class="theme-selector">
+                <div class="theme-btn theme-rainbow-btn active" data-theme="rainbow" title="Rainbow"></div>
+                <div class="theme-btn theme-ocean-btn" data-theme="ocean" title="Ocean"></div>
+                <div class="theme-btn theme-sunset-btn" data-theme="sunset" title="Sunset"></div>
+                <div class="theme-btn theme-forest-btn" data-theme="forest" title="Forest"></div>
+                <div class="theme-btn theme-space-btn" data-theme="space" title="Space"></div>
+                <div class="theme-btn theme-candy-btn" data-theme="candy" title="Candy"></div>
+                <div class="theme-btn theme-neon-btn" data-theme="neon" title="Neon"></div>
+                <div class="theme-btn theme-autumn-btn" data-theme="autumn" title="Autumn"></div>
+                <div class="theme-btn theme-arctic-btn" data-theme="arctic" title="Arctic"></div>
+                <div class="theme-btn theme-volcano-btn" data-theme="volcano" title="Volcano"></div>
+            </div>
+        </div>
+
+        <div class="missions-panel">
+            <div class="missions-title">🎯 Missions</div>
+            <div class="overall-progress">
+                <div class="overall-progress-label">Overall Progress</div>
+                <div class="overall-progress-bar">
+                    <div class="overall-progress-fill" id="overallProgress" style="width: 0%"></div>
+                </div>
+                <div id="overallProgressText">0 / 8 missions completed</div>
+            </div>
+            <div id="missionsList"></div>
+        </div>
+
+        <div class="instructions">
+            Pop bubbles to complete missions and level up! 🎈
+        </div>
+
+        <div class="notification" id="notification"></div>
+    </div>
+
+    <script>
+        let score = 0;
+        let streak = 0;
+        let level = 1;
+        let bubbles = [];
+        let currentTheme = 'rainbow';
+        let lastPopTime = 0;
+        let goldenBubbles = 0;
+        let giantBubbles = 0;
+        let fastPops = 0;
+        let themesUsed = new Set(['rainbow']);
+        let gameRunning = true;
+        let spawnInterval;
+        let missionIdCounter = 8;
+
+        const colors = {
+            rainbow: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#a8e6cf', '#ffd93d'],
+            ocean: ['#667eea', '#764ba2', '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'],
+            sunset: ['#ff9a9e', '#fecfef', '#fad0c4', '#ffd1ff', '#ff9a8b', '#ffecd2'],
+            forest: ['#a8edea', '#fed6e3', '#d299c2', '#fef9d7', '#efd5ff', '#b5fffc'],
+            space: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'],
+            candy: ['#ff6b9d', '#c44569', '#f8b500', '#ff3838', '#ff9ff3', '#54a0ff'],
+            neon: ['#0f0f23', '#2d1b69', '#11998e', '#ff6348', '#ffa502', '#7bed9f'],
+            autumn: ['#d63031', '#e17055', '#fdcb6e', '#6c5ce7', '#fd79a8', '#e84393'],
+            arctic: ['#74b9ff', '#0984e3', '#00cec9', '#81ecec', '#a29bfe', '#fd79a8'],
+            volcano: ['#fd79a8', '#e84393', '#d63031', '#2d3436', '#636e72', '#b2bec3']
+        };
+
+        let missions = [
+            {
+                id: 'first_pop',
+                name: 'First Pop!',
+                description: 'Pop your first bubble',
+                target: 1,
+                current: 0,
+                reward: '+5 XP',
+                type: 'score'
+            },
+            {
+                id: 'bubble_master',
+                name: 'Bubble Master',
+                description: 'Pop 50 bubbles',
+                target: 50,
+                current: 0,
+                reward: '+20 XP',
+                type: 'score'
+            },
+            {
+                id: 'streak_starter',
+                name: 'Streak Starter',
+                description: 'Get a 10 bubble streak',
+                target: 10,
+                current: 0,
+                reward: '+15 XP',
+                type: 'streak'
+            },
+            {
+                id: 'golden_hunter',
+                name: 'Golden Hunter',
+                description: 'Pop 5 golden bubbles',
+                target: 5,
+                current: 0,
+                reward: '+25 XP',
+                type: 'golden'
+            },
+            {
+                id: 'giant_slayer',
+                name: 'Giant Slayer',
+                description: 'Pop 3 giant bubbles',
+                target: 3,
+                current: 0,
+                reward: '+30 XP',
+                type: 'giant'
+            },
+            {
+                id: 'speed_demon',
+                name: 'Speed Demon',
+                description: 'Pop 10 bubbles in under 2 seconds each',
+                target: 10,
+                current: 0,
+                reward: '+35 XP',
+                type: 'fast'
+            },
+            {
+                id: 'theme_explorer',
+                name: 'Theme Explorer',
+                description: 'Try 5 different themes',
+                target: 5,
+                current: 1,
+                reward: '+40 XP',
+                type: 'themes'
+            },
+            {
+                id: 'bubble_legend',
+                name: 'Bubble Legend',
+                description: 'Pop 200 bubbles',
+                target: 200,
+                current: 0,
+                reward: '+50 XP',
+                type: 'score'
+            }
+        ];
+
+        const missionTemplates = [
+            { name: 'Bubble Collector', description: 'Pop {target} bubbles', type: 'score', baseTarget: 25, reward: '+15 XP' },
+            { name: 'Streak Master', description: 'Get a {target} bubble streak', type: 'streak', baseTarget: 15, reward: '+20 XP' },
+            { name: 'Golden Seeker', description: 'Pop {target} golden bubbles', type: 'golden', baseTarget: 3, reward: '+25 XP' },
+            { name: 'Giant Hunter', description: 'Pop {target} giant bubbles', type: 'giant', baseTarget: 2, reward: '+30 XP' },
+            { name: 'Lightning Fast', description: 'Pop {target} bubbles quickly', type: 'fast', baseTarget: 8, reward: '+35 XP' },
+            { name: 'Theme Switcher', description: 'Use {target} different themes', type: 'themes', baseTarget: 3, reward: '+25 XP' },
+            { name: 'Bubble Champion', description: 'Pop {target} bubbles', type: 'score', baseTarget: 100, reward: '+40 XP' },
+            { name: 'Combo King', description: 'Get a {target} bubble streak', type: 'streak', baseTarget: 25, reward: '+45 XP' }
+        ];
+
+        function generateNewMission() {
+            const template = missionTemplates[Math.floor(Math.random() * missionTemplates.length)];
+            const difficultyMultiplier = Math.max(1, Math.floor(level / 3));
+            const target = Math.ceil(template.baseTarget * difficultyMultiplier);
+            
+            return {
+                id: `mission_${missionIdCounter++}`,
+                name: template.name,
+                description: template.description.replace('{target}', target),
+                target: target,
+                current: template.type === 'themes' ? themesUsed.size : 0,
+                reward: template.reward,
+                type: template.type
+            };
+        }
+
+        function updateMissions() {
+            const missionsList = document.getElementById('missionsList');
+            missionsList.innerHTML = '';
+
+            let completedCount = 0;
+
+            missions.forEach(mission => {
+                const missionDiv = document.createElement('div');
+                missionDiv.className = 'mission';
+                
+                const isCompleted = mission.current >= mission.target;
+                if (isCompleted) {
+                    missionDiv.classList.add('completed');
+                    completedCount++;
+                } else if (mission.current > 0) {
+                    missionDiv.classList.add('active');
+                }
+
+                const progressPercent = Math.min(100, (mission.current / mission.target) * 100);
+
+                missionDiv.innerHTML = `
+                    <div class="mission-name">${mission.name}</div>
+                    <div class="mission-desc">${mission.description}</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div class="mission-progress">
+                        <span>${mission.current}/${mission.target}</span>
+                        <span class="mission-reward">${mission.reward}</span>
+                    </div>
+                `;
+
+                missionsList.appendChild(missionDiv);
+            });
+
+            // Update overall progress
+            const overallPercent = (completedCount / missions.length) * 100;
+            document.getElementById('overallProgress').style.width = overallPercent + '%';
+            document.getElementById('overallProgressText').textContent = `${completedCount} / ${missions.length} missions completed`;
+        }
+
+        function checkMissions(type, value = 1) {
+            let missionCompleted = false;
+            
+            missions.forEach((mission, index) => {
+                if (mission.type === type && mission.current < mission.target) {
+                    mission.current = Math.min(mission.current + value, mission.target);
+                    
+                    if (mission.current === mission.target && !missionCompleted) {
+                        showNotification(`Mission Complete: ${mission.name}!`);
+                        level++;
+                        document.getElementById('levelCount').textContent = level;
+                        missionCompleted = true;
+                        
+                        // Replace completed mission with a new one after a delay
+                        setTimeout(() => {
+                            missions[index] = generateNewMission();
+                            updateMissions();
+                        }, 2000);
+                    }
+                }
+            });
+            updateMissions();
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        function toggleGame() {
+            gameRunning = !gameRunning;
+            const btn = document.getElementById('playPauseBtn');
+            
+            if (gameRunning) {
+                btn.textContent = '⏸️ Pause';
+                btn.classList.remove('paused');
+                // Resume bubble animations
+                bubbles.forEach(bubble => {
+                    bubble.style.animationPlayState = 'running';
+                });
+            } else {
+                btn.textContent = '▶️ Play';
+                btn.classList.add('paused');
+                // Pause bubble animations
+                bubbles.forEach(bubble => {
+                    bubble.style.animationPlayState = 'paused';
+                });
+            }
+        }
+
+        function createBubble() {
+            if (!gameRunning) return;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            const size = Math.random() * 80 + 40;
+            const x = Math.random() * (window.innerWidth - size - 300); // Account for missions panel
+            const y = Math.random() * (window.innerHeight - size - 200) + 100;
+            
+            // Special bubble types
+            const rand = Math.random();
+            let isSpecial = false;
+            
+            if (rand < 0.05) { // 5% chance for golden bubble
+                bubble.classList.add('golden');
+                bubble.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e, #ffd700)';
+                isSpecial = 'golden';
+            } else if (rand < 0.08) { // 3% chance for giant bubble
+                bubble.classList.add('giant');
+                const giantSize = size * 1.5;
+                bubble.style.width = giantSize + 'px';
+                bubble.style.height = giantSize + 'px';
+                isSpecial = 'giant';
+            } else {
+                bubble.style.background = colors[currentTheme][Math.floor(Math.random() * colors[currentTheme].length)];
+            }
+            
+            bubble.style.width = bubble.style.width || size + 'px';
+            bubble.style.height = bubble.style.height || size + 'px';
+            bubble.style.left = x + 'px';
+            bubble.style.top = y + 'px';
+            bubble.style.animationDelay = Math.random() * 2 + 's';
+            bubble.style.animationDuration = (Math.random() * 4 + 4) + 's';
+            
+            bubble.dataset.special = isSpecial || 'normal';
+            bubble.addEventListener('click', popBubble);
+            
+            document.querySelector('.container').appendChild(bubble);
+            bubbles.push(bubble);
+            
+            setTimeout(() => {
+                if (bubble.parentNode) {
+                    bubble.remove();
+                    bubbles = bubbles.filter(b => b !== bubble);
+                }
+            }, 8000);
+        }
+
+        function popBubble(event) {
+            if (!gameRunning) return;
+            
+            const bubble = event.target;
+            const currentTime = Date.now();
+            const timeSinceLastPop = currentTime - lastPopTime;
+            
+            bubble.classList.add('popping');
+            score++;
+            
+            // Update streak
+            if (timeSinceLastPop < 3000) { // 3 seconds to maintain streak
+                streak++;
+            } else {
+                streak = 1;
+            }
+            
+            // Check for fast pops
+            if (timeSinceLastPop < 2000 && lastPopTime > 0) {
+                fastPops++;
+                checkMissions('fast');
+            }
+            
+            // Handle special bubbles
+            if (bubble.dataset.special === 'golden') {
+                goldenBubbles++;
+                checkMissions('golden');
+                score += 4; // Bonus points
+            } else if (bubble.dataset.special === 'giant') {
+                giantBubbles++;
+                checkMissions('giant');
+                score += 2; // Bonus points
+            }
+            
+            lastPopTime = currentTime;
+            
+            // Update UI
+            document.getElementById('scoreCount').textContent = score;
+            document.getElementById('streakCount').textContent = streak;
+            
+            // Check missions
+            checkMissions('score');
+            checkMissions('streak', streak);
+            
+            // Create pop effect
+            createPopEffect(bubble);
+            
+            setTimeout(() => {
+                if (bubble.parentNode) {
+                    bubble.remove();
+                    bubbles = bubbles.filter(b => b !== bubble);
+                }
+            }, 300);
+        }
+
+        function createPopEffect(bubble) {
+            const rect = bubble.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const particleCount = bubble.dataset.special === 'giant' ? 10 : 6;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.width = '8px';
+                particle.style.height = '8px';
+                particle.style.borderRadius = '50%';
+                particle.style.background = bubble.style.background;
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '1000';
+                
+                const angle = (i / particleCount) * Math.PI * 2;
+                const distance = bubble.dataset.special === 'giant' ? 80 : 50;
+                const endX = centerX + Math.cos(angle) * distance;
+                const endY = centerY + Math.sin(angle) * distance;
+                
+                document.body.appendChild(particle);
+                
+                particle.animate([
+                    { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                    { transform: `translate(${endX - centerX}px, ${endY - centerY}px) scale(0)`, opacity: 0 }
+                ], {
+                    duration: 500,
+                    easing: 'ease-out'
+                }).onfinish = () => particle.remove();
+            }
+        }
+
+        function changeTheme(theme) {
+            currentTheme = theme;
+            themesUsed.add(theme);
+            document.body.className = `theme-${theme}`;
+            
+            // Update active theme button
+            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-theme="${theme}"]`).classList.add('active');
+            
+            // Update existing bubbles with new colors (except special ones)
+            bubbles.forEach(bubble => {
+                if (bubble.dataset.special === 'normal') {
+                    bubble.style.background = colors[currentTheme][Math.floor(Math.random() * colors[currentTheme].length)];
+                }
+            });
+            
+            // Check theme mission
+            checkMissions('themes', themesUsed.size - missions.find(m => m.id === 'theme_explorer').current);
+        }
+
+        // Theme selector event listeners
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                changeTheme(btn.dataset.theme);
+            });
+        });
+
+        // Create bubbles continuously
+        function spawnBubbles() {
+            if (!gameRunning) return;
+            const maxBubbles = Math.min(15, 8 + Math.floor(level / 2)); // More bubbles as level increases
+            if (bubbles.length < maxBubbles) {
+                createBubble();
+            }
+        }
+
+        // Initialize
+        updateMissions();
+        spawnInterval = setInterval(spawnBubbles, 1000);
+        
+        // Create initial bubbles
+        for (let i = 0; i < 6; i++) {
+            setTimeout(() => createBubble(), i * 200);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            bubbles.forEach(bubble => {
+                const rect = bubble.getBoundingClientRect();
+                if (rect.right > window.innerWidth || rect.bottom > window.innerHeight) {
+                    bubble.remove();
+                    bubbles = bubbles.filter(b => b !== bubble);
+                }
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97cef0617763b280',t:'MTc1NzUwNzQ1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
